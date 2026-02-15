@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scoreboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -35,43 +38,35 @@
 
         @keyframes scoreUpdate {
             0% { 
-                transform: scale(1) rotateX(0deg) translateZ(0); 
+                transform: scale(1) rotateX(0deg) translate3d(0, 0, 0); 
                 opacity: 1; 
             }
-            25% { 
-                transform: scale(0.85) rotateX(90deg) translateZ(0); 
-                opacity: 0.4; 
-            }
             50% { 
-                transform: scale(1.15) rotateX(180deg) translateZ(0); 
+                transform: scale(1.1) rotateX(180deg) translate3d(0, 0, 0); 
                 opacity: 0.6; 
             }
-            75% { 
-                transform: scale(1.05) rotateX(270deg) translateZ(0); 
-                opacity: 0.85; 
-            }
             100% { 
-                transform: scale(1) rotateX(360deg) translateZ(0); 
+                transform: scale(1) rotateX(360deg) translate3d(0, 0, 0); 
                 opacity: 1; 
             }
         }
 
         @keyframes cardFlash {
             0%, 100% { 
-                filter: brightness(1);
+                filter: brightness(1) contrast(1);
             }
             50% { 
-                filter: brightness(1.25);
+                filter: brightness(1.2) contrast(1.05);
             }
         }
 
         @keyframes cardPulse {
             0%, 100% { 
-                transform: scale(1) translateZ(0);
+                transform: scale(1) translate3d(0, 0, 0);
                 box-shadow: 0 25px 60px rgba(121, 49, 150, 0.5);
             }
             50% { 
-                transform: scale(1.04) translateZ(0);
+                transform: scale(1.03) translate3d(0, 0, 0);
                 box-shadow: 0 30px 80px rgba(121, 49, 150, 0.8), 
                            0 0 40px rgba(255, 205, 46, 0.6);
             }
@@ -79,11 +74,11 @@
 
         @keyframes cardPulse2 {
             0%, 100% { 
-                transform: scale(1) translateZ(0);
+                transform: scale(1) translate3d(0, 0, 0);
                 box-shadow: 0 25px 60px rgba(66, 130, 254, 0.5);
             }
             50% { 
-                transform: scale(1.04) translateZ(0);
+                transform: scale(1.03) translate3d(0, 0, 0);
                 box-shadow: 0 30px 80px rgba(66, 130, 254, 0.8), 
                            0 0 40px rgba(255, 205, 46, 0.6);
             }
@@ -106,7 +101,7 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
             background: linear-gradient(-45deg, #351a55, #1f1c61, #2a1847, #4282FE);
             background-size: 400% 400%;
             animation: gradientShift 15s ease infinite;
@@ -140,15 +135,16 @@
 
         .scoreboard-title {
             text-align: center;
-            font-size: 72px;
+            font-size: 96px;
             font-weight: 900;
+            font-family: 'Bebas Neue', 'Impact', 'Arial Black', 'Arial Narrow', sans-serif;
             background: linear-gradient(45deg, #FFCD2E, #FFE066, #FFCD2E);
             background-size: 200% auto;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             text-shadow: 0 0 30px rgba(255, 205, 46, 0.5);
-            margin-bottom: 50px;
+            margin-bottom: 180px;
             letter-spacing: 5px;
             text-transform: uppercase;
             animation: shimmer 3s linear infinite;
@@ -168,14 +164,16 @@
             text-align: center;
             padding: 60px 40px;
             border-radius: 40px;
-            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), 
-                        box-shadow 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1), 
+                        box-shadow 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
             backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 3px solid rgba(255, 255, 255, 0.3);
             overflow: hidden;
-            will-change: transform, box-shadow;
+            will-change: transform;
             backface-visibility: hidden;
             -webkit-font-smoothing: antialiased;
+            transform: translate3d(0, 0, 0);
         }
 
         .team::before {
@@ -229,6 +227,7 @@
         .team-name {
             font-size: 52px;
             font-weight: 800;
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
             color: white;
             margin-bottom: 40px;
             text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
@@ -246,6 +245,7 @@
         .score {
             font-size: 200px;
             font-weight: 900;
+            font-family: 'Bebas Neue', 'Impact', 'Arial Black', 'Arial Narrow', sans-serif;
             color: white;
             text-shadow: 0 8px 20px rgba(0, 0, 0, 0.4),
                          0 0 40px rgba(255, 255, 255, 0.3);
@@ -260,23 +260,23 @@
         }
 
         .score.animate-update {
-            animation: scoreUpdate 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            animation: scoreUpdate 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
         }
 
         .team-1.updating {
-            animation: cardPulse 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            animation: cardPulse 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
         }
 
         .team-1.updating::before {
-            animation: cardFlash 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            animation: cardFlash 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
         }
 
         .team-2.updating {
-            animation: cardPulse2 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            animation: cardPulse2 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
         }
 
         .team-2.updating::before {
-            animation: cardFlash 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            animation: cardFlash 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
         }
 
         .ripple-effect {
@@ -368,28 +368,6 @@
             .keybind-grid {
                 grid-template-columns: 1fr;
             }
-        }
-
-        .settings-btn {
-            position: fixed;
-            top: 30px;
-            right: 30px;
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #FFCD2E 0%, #FFE066 100%);
-            border: 3px solid rgba(53, 26, 85, 0.6);
-            cursor: pointer;
-            font-size: 32px;
-            color: #351a55;
-            box-shadow: 0 8px 25px rgba(255, 205, 46, 0.5);
-            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            z-index: 1000;
-        }
-
-        .settings-btn:hover {
-            transform: rotate(180deg) scale(1.15);
-            box-shadow: 0 12px 35px rgba(255, 205, 46, 0.8);
         }
 
         .modal-overlay {
@@ -619,10 +597,116 @@
             margin-top: 8px;
             font-style: italic;
         }
+
+        .winner-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(15px);
+            z-index: 3000;
+            animation: fadeIn 0.5s ease;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .winner-overlay.active {
+            display: flex;
+        }
+
+        .winner-content {
+            text-align: center;
+            z-index: 3001;
+            animation: zoomIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .winner-title {
+            font-size: 80px;
+            font-weight: 900;
+            font-family: 'Bebas Neue', 'Impact', 'Arial Black', 'Arial Narrow', sans-serif;
+            background: linear-gradient(135deg, #FFCD2E, #FFE066);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 8px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .winner-team {
+            font-size: 120px;
+            font-weight: 900;
+            font-family: 'Bebas Neue', 'Impact', 'Arial Black', 'Arial Narrow', sans-serif;
+            color: white;
+            text-shadow: 0 0 40px rgba(255, 205, 46, 0.8),
+                         0 0 80px rgba(255, 205, 46, 0.5);
+            margin: 20px 0;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        .winner-margin {
+            font-size: 50px;
+            font-weight: 700;
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            color: #FFCD2E;
+            margin-top: 20px;
+            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .winner-close-hint {
+            font-size: 24px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 50px;
+            font-style: italic;
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #FFCD2E;
+            position: absolute;
+            animation: confetti-fall linear forwards;
+        }
+
+        @keyframes confetti-fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes zoomIn {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
     </style>
 </head>
 <body>
-    <button class="settings-btn" onclick="openSettings()">⚙️</button>
+    <!-- Winner Announcement Overlay -->
+    <div class="winner-overlay" id="winnerOverlay">
+        <div class="winner-content">
+            <div class="winner-title">🏆 WINNER 🏆</div>
+            <div class="winner-team" id="winnerTeamName"></div>
+            <div class="winner-margin" id="winnerMargin"></div>
+            <div class="winner-close-hint">Press F to close</div>
+        </div>
+    </div>
 
     <div class="container">
         <h1 class="scoreboard-title" id="scoreboardTitle">Scoreboard</h1>
@@ -799,19 +883,21 @@
                 void teamCard.offsetWidth;
                 
                 // Add update animations
-                scoreElement.classList.add('animate-update');
-                teamCard.classList.add('updating');
+                requestAnimationFrame(() => {
+                    scoreElement.classList.add('animate-update');
+                    teamCard.classList.add('updating');
+                });
                 
                 // Update score text at the midpoint of the flip animation
                 setTimeout(() => {
                     scoreElement.textContent = scores[key];
-                }, 300);
+                }, 250);
                 
                 // Remove animation classes after animation completes
                 setTimeout(() => {
                     scoreElement.classList.remove('animate-update');
                     teamCard.classList.remove('updating');
-                }, 600);
+                }, 500);
                 
                 saveSettingsToStorage();
             }
@@ -900,13 +986,85 @@
             recordingKey = null;
         }
 
+        // Winner announcement functionality
+        function showWinner() {
+            const team1Score = scores.team1;
+            const team2Score = scores.team2;
+            
+            if (team1Score === team2Score) {
+                // It's a tie
+                document.getElementById('winnerTeamName').textContent = "IT'S A TIE!";
+                document.getElementById('winnerMargin').textContent = `Both teams scored ${team1Score} points`;
+            } else {
+                const winner = team1Score > team2Score ? 1 : 2;
+                const winnerName = winner === 1 ? settings.team1Name : settings.team2Name;
+                const margin = Math.abs(team1Score - team2Score);
+                
+                document.getElementById('winnerTeamName').textContent = winnerName;
+                document.getElementById('winnerMargin').textContent = `Won by ${margin} point${margin !== 1 ? 's' : ''}`;
+            }
+            
+            document.getElementById('winnerOverlay').classList.add('active');
+            createConfetti();
+        }
+
+        function hideWinner() {
+            document.getElementById('winnerOverlay').classList.remove('active');
+            // Clear any remaining confetti
+            const confettiElements = document.querySelectorAll('.confetti');
+            confettiElements.forEach(el => el.remove());
+        }
+
+        function createConfetti() {
+            const colors = ['#FFCD2E', '#4282FE', '#793196', '#FFE066', '#3498B3', '#FF6B9D'];
+            const confettiCount = 150;
+            
+            for (let i = 0; i < confettiCount; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.top = '-10px';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.width = (Math.random() * 10 + 5) + 'px';
+                    confetti.style.height = (Math.random() * 10 + 5) + 'px';
+                    confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                    confetti.style.animationDelay = '0s';
+                    
+                    document.getElementById('winnerOverlay').appendChild(confetti);
+                    
+                    // Remove confetti after animation
+                    setTimeout(() => confetti.remove(), 5000);
+                }, i * 30);
+            }
+        }
+
         // Handle keyboard shortcuts
         document.addEventListener('keydown', (event) => {
+            const key = event.key.toLowerCase();
+            
+            // Winner announcement - F key (always works)
+            if (key === 'f') {
+                event.preventDefault();
+                if (document.getElementById('winnerOverlay').classList.contains('active')) {
+                    hideWinner();
+                } else {
+                    showWinner();
+                }
+                return;
+            }
+            
+            // Settings shortcut - always works regardless of shortcuts toggle
+            if (key === 's' && !document.getElementById('modalOverlay').classList.contains('active') && !recordingKey) {
+                event.preventDefault();
+                openSettings();
+                return;
+            }
+            
+            // Other shortcuts only work if enabled
             if (!settings.shortcutsEnabled) return;
             if (document.getElementById('modalOverlay').classList.contains('active')) return;
             if (recordingKey) return;
-            
-            const key = event.key.toLowerCase();
             
             if (key === settings.keybinds.team1Plus) {
                 event.preventDefault();
