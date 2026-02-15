@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scoreboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.3), 0 0 40px rgba(255, 255, 255, 0.2); }
+            50% { box-shadow: 0 0 40px rgba(255, 255, 255, 0.5), 0 0 80px rgba(255, 255, 255, 0.3); }
+        }
+
+        @keyframes scoreChange {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2) rotate(5deg); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes scoreUpdate {
+            0% { 
+                transform: scale(1) rotateX(0deg) translateZ(0); 
+                opacity: 1; 
+            }
+            25% { 
+                transform: scale(0.85) rotateX(90deg) translateZ(0); 
+                opacity: 0.4; 
+            }
+            50% { 
+                transform: scale(1.15) rotateX(180deg) translateZ(0); 
+                opacity: 0.6; 
+            }
+            75% { 
+                transform: scale(1.05) rotateX(270deg) translateZ(0); 
+                opacity: 0.85; 
+            }
+            100% { 
+                transform: scale(1) rotateX(360deg) translateZ(0); 
+                opacity: 1; 
+            }
+        }
+
+        @keyframes cardFlash {
+            0%, 100% { 
+                filter: brightness(1);
+            }
+            50% { 
+                filter: brightness(1.25);
+            }
+        }
+
+        @keyframes cardPulse {
+            0%, 100% { 
+                transform: scale(1) translateZ(0);
+                box-shadow: 0 25px 60px rgba(121, 49, 150, 0.5);
+            }
+            50% { 
+                transform: scale(1.04) translateZ(0);
+                box-shadow: 0 30px 80px rgba(121, 49, 150, 0.8), 
+                           0 0 40px rgba(255, 205, 46, 0.6);
+            }
+        }
+
+        @keyframes cardPulse2 {
+            0%, 100% { 
+                transform: scale(1) translateZ(0);
+                box-shadow: 0 25px 60px rgba(66, 130, 254, 0.5);
+            }
+            50% { 
+                transform: scale(1.04) translateZ(0);
+                box-shadow: 0 30px 80px rgba(66, 130, 254, 0.8), 
+                           0 0 40px rgba(255, 205, 46, 0.6);
+            }
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(0.8);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(2.5);
+                opacity: 0;
+            }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(-45deg, #351a55, #1f1c61, #2a1847, #4282FE);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: float 20s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1600px;
+            position: relative;
+            z-index: 1;
+            will-change: transform;
+        }
+
+        .scoreboard-title {
+            text-align: center;
+            font-size: 72px;
+            font-weight: 900;
+            background: linear-gradient(45deg, #FFCD2E, #FFE066, #FFCD2E);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(255, 205, 46, 0.5);
+            margin-bottom: 50px;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            animation: shimmer 3s linear infinite;
+            filter: drop-shadow(0 4px 12px rgba(53, 26, 85, 0.6));
+            will-change: background-position;
+        }
+
+        .teams-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            padding: 0 20px;
+        }
+
+        .team {
+            position: relative;
+            text-align: center;
+            padding: 60px 40px;
+            border-radius: 40px;
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                        box-shadow 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            backdrop-filter: blur(20px);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            overflow: hidden;
+            will-change: transform, box-shadow;
+            backface-visibility: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .team::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent,
+                rgba(255, 255, 255, 0.1),
+                transparent
+            );
+            transform: rotate(45deg);
+            animation: shimmer 3s linear infinite;
+        }
+
+        .team::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 40px;
+            padding: 3px;
+            background: linear-gradient(45deg, rgba(255,255,255,0.5), transparent, rgba(255,255,255,0.5));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+            opacity: 0.5;
+        }
+
+        .team.active {
+            transform: translateY(-15px) scale(1.02);
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        .team-1 {
+            background: linear-gradient(135deg, rgba(53, 26, 85, 0.95) 0%, rgba(121, 49, 150, 0.95) 100%);
+            box-shadow: 0 25px 60px rgba(121, 49, 150, 0.5), 
+                        0 0 0 1px rgba(255, 205, 46, 0.2) inset;
+        }
+
+        .team-2 {
+            background: linear-gradient(135deg, rgba(66, 130, 254, 0.95) 0%, rgba(52, 152, 179, 0.95) 100%);
+            box-shadow: 0 25px 60px rgba(66, 130, 254, 0.5),
+                        0 0 0 1px rgba(255, 205, 46, 0.2) inset;
+        }
+
+        .team-name {
+            font-size: 52px;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 40px;
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            letter-spacing: 3px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .score-container {
+            position: relative;
+            display: inline-block;
+            perspective: 1000px;
+        }
+
+        .score {
+            font-size: 200px;
+            font-weight: 900;
+            color: white;
+            text-shadow: 0 8px 20px rgba(0, 0, 0, 0.4),
+                         0 0 40px rgba(255, 255, 255, 0.3);
+            line-height: 1;
+            position: relative;
+            z-index: 2;
+            display: inline-block;
+            will-change: transform, opacity;
+            backface-visibility: hidden;
+            -webkit-font-smoothing: antialiased;
+            transform-style: preserve-3d;
+        }
+
+        .score.animate-update {
+            animation: scoreUpdate 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .team-1.updating {
+            animation: cardPulse 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .team-1.updating::before {
+            animation: cardFlash 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .team-2.updating {
+            animation: cardPulse2 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .team-2.updating::before {
+            animation: cardFlash 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .ripple-effect {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            animation: ripple 0.6s ease-out;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .scoreboard-title {
+                font-size: 56px;
+            }
+            
+            .teams-container {
+                gap: 50px;
+            }
+            
+            .team-name {
+                font-size: 40px;
+            }
+            
+            .score {
+                font-size: 160px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .scoreboard-title {
+                font-size: 42px;
+                margin-bottom: 30px;
+                letter-spacing: 2px;
+            }
+            
+            .teams-container {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            
+            .team {
+                padding: 50px 30px;
+            }
+            
+            .team-name {
+                font-size: 36px;
+            }
+            
+            .score {
+                font-size: 140px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .scoreboard-title {
+                font-size: 32px;
+                letter-spacing: 1px;
+            }
+            
+            .team {
+                padding: 40px 20px;
+                border-radius: 30px;
+            }
+            
+            .team-name {
+                font-size: 28px;
+                margin-bottom: 30px;
+            }
+            
+            .score {
+                font-size: 100px;
+            }
+            
+            .settings-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 24px;
+                top: 20px;
+                right: 20px;
+            }
+
+            .keybind-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .settings-btn {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FFCD2E 0%, #FFE066 100%);
+            border: 3px solid rgba(53, 26, 85, 0.6);
+            cursor: pointer;
+            font-size: 32px;
+            color: #351a55;
+            box-shadow: 0 8px 25px rgba(255, 205, 46, 0.5);
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 1000;
+        }
+
+        .settings-btn:hover {
+            transform: rotate(180deg) scale(1.15);
+            box-shadow: 0 12px 35px rgba(255, 205, 46, 0.8);
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 240, 255, 0.95));
+            border-radius: 30px;
+            padding: 45px;
+            width: 90%;
+            max-width: 650px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+            animation: slideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-100px) scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 35px;
+        }
+
+        .modal-title {
+            font-size: 36px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #351a55 0%, #793196 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .close-btn {
+            background: linear-gradient(135deg, #FFCD2E, #FFE066);
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #351a55;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            transform: rotate(90deg) scale(1.1);
+            box-shadow: 0 5px 15px rgba(255, 205, 46, 0.6);
+        }
+
+        .settings-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 18px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 16px;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 14px 18px;
+            font-size: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #4282FE;
+            box-shadow: 0 0 0 4px rgba(66, 130, 254, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .checkbox {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            accent-color: #4282FE;
+        }
+
+        .keybind-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin-top: 18px;
+        }
+
+        .keybind-item {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .keybind-input {
+            padding: 12px 16px;
+            font-size: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 700;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, #f8f8f8, #fff);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .keybind-input:focus {
+            outline: none;
+            border-color: #4282FE;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(66, 130, 254, 0.15);
+        }
+
+        .keybind-input.recording {
+            border-color: #FFCD2E;
+            background: linear-gradient(135deg, #fffef0, #fffae0);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+        }
+
+        .save-btn {
+            width: 100%;
+            padding: 18px;
+            font-size: 19px;
+            font-weight: 700;
+            color: white;
+            background: linear-gradient(135deg, #4282FE 0%, #3498B3 100%);
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 25px;
+            box-shadow: 0 8px 20px rgba(66, 130, 254, 0.4);
+        }
+
+        .save-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(66, 130, 254, 0.6);
+        }
+
+        .save-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .reset-btn {
+            width: 100%;
+            padding: 14px;
+            font-size: 17px;
+            font-weight: 600;
+            color: #666;
+            background: linear-gradient(135deg, #f0f0f0, #e8e8e8);
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 12px;
+        }
+
+        .reset-btn:hover {
+            background: linear-gradient(135deg, #e8e8e8, #d8d8d8);
+            color: #333;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .shortcut-hint {
+            font-size: 14px;
+            color: #999;
+            margin-top: 8px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <button class="settings-btn" onclick="openSettings()">⚙️</button>
+
+    <div class="container">
+        <h1 class="scoreboard-title" id="scoreboardTitle">Scoreboard</h1>
+        <div class="teams-container">
+            <div class="team team-1">
+                <div class="team-name" id="team1Name">Team 1</div>
+                <div class="score-container">
+                    <div class="score" id="score1">0</div>
+                </div>
+            </div>
+
+            <div class="team team-2">
+                <div class="team-name" id="team2Name">Team 2</div>
+                <div class="score-container">
+                    <div class="score" id="score2">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModalOnOverlay(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2 class="modal-title">Settings</h2>
+                <button class="close-btn" onclick="closeSettings()">×</button>
+            </div>
+
+            <div class="settings-section">
+                <h3 class="section-title">Scoreboard Title</h3>
+                <div class="input-group">
+                    <label class="input-label">Title</label>
+                    <input type="text" class="input-field" id="titleInput" placeholder="Enter scoreboard title">
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3 class="section-title">Team Names</h3>
+                <div class="input-group">
+                    <label class="input-label">Team 1 Name</label>
+                    <input type="text" class="input-field" id="team1Input" placeholder="Enter team 1 name">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Team 2 Name</label>
+                    <input type="text" class="input-field" id="team2Input" placeholder="Enter team 2 name">
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <div class="checkbox-group">
+                    <input type="checkbox" class="checkbox" id="shortcutsEnabled" onchange="toggleShortcuts()">
+                    <label class="input-label" style="margin: 0;">Enable Keyboard Shortcuts</label>
+                </div>
+                <p class="shortcut-hint">Click on a key binding box and press any key to set it</p>
+            </div>
+
+            <div class="settings-section" id="keybindSection">
+                <h3 class="section-title">Keyboard Shortcuts</h3>
+                <div class="keybind-grid">
+                    <div class="keybind-item">
+                        <label class="input-label">Team 1 Increase</label>
+                        <input type="text" class="keybind-input" id="team1Plus" readonly onclick="recordKey(this, 'team1Plus')" placeholder="Click to set">
+                    </div>
+                    <div class="keybind-item">
+                        <label class="input-label">Team 1 Decrease</label>
+                        <input type="text" class="keybind-input" id="team1Minus" readonly onclick="recordKey(this, 'team1Minus')" placeholder="Click to set">
+                    </div>
+                    <div class="keybind-item">
+                        <label class="input-label">Team 2 Increase</label>
+                        <input type="text" class="keybind-input" id="team2Plus" readonly onclick="recordKey(this, 'team2Plus')" placeholder="Click to set">
+                    </div>
+                    <div class="keybind-item">
+                        <label class="input-label">Team 2 Decrease</label>
+                        <input type="text" class="keybind-input" id="team2Minus" readonly onclick="recordKey(this, 'team2Minus')" placeholder="Click to set">
+                    </div>
+                    <div class="keybind-item">
+                        <label class="input-label">Reset Scores</label>
+                        <input type="text" class="keybind-input" id="resetKey" readonly onclick="recordKey(this, 'resetScores')" placeholder="Click to set">
+                    </div>
+                </div>
+            </div>
+
+            <button class="save-btn" onclick="saveSettings()">Save Settings</button>
+            <button class="reset-btn" onclick="resetScores()">Reset Scores</button>
+        </div>
+    </div>
+
+    <script>
+        // State management
+        let scores = { team1: 0, team2: 0 };
+        let settings = {
+            title: 'Scoreboard',
+            team1Name: 'Team 1',
+            team2Name: 'Team 2',
+            shortcutsEnabled: true,
+            keybinds: {
+                team1Plus: 'q',
+                team1Minus: 'a',
+                team2Plus: 'p',
+                team2Minus: 'l',
+                resetScores: 'r'
+            }
+        };
+        let recordingKey = null;
+
+        // Load settings from localStorage
+        function loadSettings() {
+            const saved = localStorage.getItem('scoreboardSettings');
+            if (saved) {
+                settings = JSON.parse(saved);
+            }
+            const savedScores = localStorage.getItem('scoreboardScores');
+            if (savedScores) {
+                scores = JSON.parse(savedScores);
+            }
+            applySettings();
+        }
+
+        // Apply settings to UI
+        function applySettings() {
+            document.getElementById('scoreboardTitle').textContent = settings.title;
+            document.getElementById('team1Name').textContent = settings.team1Name;
+            document.getElementById('team2Name').textContent = settings.team2Name;
+            document.getElementById('score1').textContent = scores.team1;
+            document.getElementById('score2').textContent = scores.team2;
+            
+            document.getElementById('titleInput').value = settings.title;
+            document.getElementById('team1Input').value = settings.team1Name;
+            document.getElementById('team2Input').value = settings.team2Name;
+            document.getElementById('shortcutsEnabled').checked = settings.shortcutsEnabled;
+            
+            document.getElementById('team1Plus').value = settings.keybinds.team1Plus.toUpperCase();
+            document.getElementById('team1Minus').value = settings.keybinds.team1Minus.toUpperCase();
+            document.getElementById('team2Plus').value = settings.keybinds.team2Plus.toUpperCase();
+            document.getElementById('team2Minus').value = settings.keybinds.team2Minus.toUpperCase();
+            document.getElementById('resetKey').value = settings.keybinds.resetScores.toUpperCase();
+            
+            toggleShortcuts();
+        }
+
+        // Save settings to localStorage
+        function saveSettingsToStorage() {
+            localStorage.setItem('scoreboardSettings', JSON.stringify(settings));
+            localStorage.setItem('scoreboardScores', JSON.stringify(scores));
+        }
+
+        // Create ripple effect
+        function createRipple(teamNumber) {
+            const team = document.querySelector(`.team-${teamNumber}`);
+            const ripple = document.createElement('div');
+            ripple.className = 'ripple-effect';
+            team.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        }
+
+        // Change score with animation
+        function changeScore(team, delta) {
+            const key = `team${team}`;
+            const oldScore = scores[key];
+            scores[key] = Math.max(0, scores[key] + delta);
+            
+            if (oldScore !== scores[key]) {
+                const scoreElement = document.getElementById(`score${team}`);
+                const teamCard = document.querySelector(`.team-${team}`);
+                
+                // Remove any existing animations
+                scoreElement.classList.remove('animate-update');
+                teamCard.classList.remove('updating', 'active');
+                
+                // Trigger reflow to restart animation
+                void scoreElement.offsetWidth;
+                void teamCard.offsetWidth;
+                
+                // Add update animations
+                scoreElement.classList.add('animate-update');
+                teamCard.classList.add('updating');
+                
+                // Update score text at the midpoint of the flip animation
+                setTimeout(() => {
+                    scoreElement.textContent = scores[key];
+                }, 300);
+                
+                // Remove animation classes after animation completes
+                setTimeout(() => {
+                    scoreElement.classList.remove('animate-update');
+                    teamCard.classList.remove('updating');
+                }, 600);
+                
+                saveSettingsToStorage();
+            }
+        }
+
+        // Open settings modal
+        function openSettings() {
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        // Close settings modal
+        function closeSettings() {
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+
+        // Close modal when clicking overlay
+        function closeModalOnOverlay(event) {
+            if (event.target === document.getElementById('modalOverlay')) {
+                closeSettings();
+            }
+        }
+
+        // Save settings
+        function saveSettings() {
+            settings.title = document.getElementById('titleInput').value || 'Scoreboard';
+            settings.team1Name = document.getElementById('team1Input').value || 'Team 1';
+            settings.team2Name = document.getElementById('team2Input').value || 'Team 2';
+            settings.shortcutsEnabled = document.getElementById('shortcutsEnabled').checked;
+            
+            applySettings();
+            saveSettingsToStorage();
+            closeSettings();
+        }
+
+        // Reset scores (with confirmation)
+        function resetScores() {
+            if (confirm('Are you sure you want to reset all scores to 0?')) {
+                scores = { team1: 0, team2: 0 };
+                document.getElementById('score1').textContent = 0;
+                document.getElementById('score2').textContent = 0;
+                saveSettingsToStorage();
+            }
+        }
+
+        // Reset scores quickly (via keyboard shortcut, no confirmation)
+        function resetScoresQuick() {
+            scores = { team1: 0, team2: 0 };
+            document.getElementById('score1').textContent = 0;
+            document.getElementById('score2').textContent = 0;
+            saveSettingsToStorage();
+        }
+
+        // Toggle shortcuts
+        function toggleShortcuts() {
+            const enabled = document.getElementById('shortcutsEnabled').checked;
+            const keybindSection = document.getElementById('keybindSection');
+            keybindSection.style.opacity = enabled ? '1' : '0.5';
+            keybindSection.style.pointerEvents = enabled ? 'auto' : 'none';
+        }
+
+        // Record key binding
+        function recordKey(element, bindName) {
+            if (!document.getElementById('shortcutsEnabled').checked) return;
+            
+            element.classList.add('recording');
+            element.value = 'Press a key...';
+            recordingKey = { element, bindName };
+            
+            // Remove any existing listener
+            document.removeEventListener('keydown', handleKeyRecord);
+            document.addEventListener('keydown', handleKeyRecord);
+        }
+
+        // Handle key recording
+        function handleKeyRecord(event) {
+            if (!recordingKey) return;
+            
+            event.preventDefault();
+            const key = event.key.toLowerCase();
+            
+            recordingKey.element.classList.remove('recording');
+            recordingKey.element.value = key.toUpperCase();
+            settings.keybinds[recordingKey.bindName] = key;
+            
+            document.removeEventListener('keydown', handleKeyRecord);
+            recordingKey = null;
+        }
+
+        // Handle keyboard shortcuts
+        document.addEventListener('keydown', (event) => {
+            if (!settings.shortcutsEnabled) return;
+            if (document.getElementById('modalOverlay').classList.contains('active')) return;
+            if (recordingKey) return;
+            
+            const key = event.key.toLowerCase();
+            
+            if (key === settings.keybinds.team1Plus) {
+                event.preventDefault();
+                changeScore(1, 1);
+            } else if (key === settings.keybinds.team1Minus) {
+                event.preventDefault();
+                changeScore(1, -1);
+            } else if (key === settings.keybinds.team2Plus) {
+                event.preventDefault();
+                changeScore(2, 1);
+            } else if (key === settings.keybinds.team2Minus) {
+                event.preventDefault();
+                changeScore(2, -1);
+            } else if (key === settings.keybinds.resetScores) {
+                event.preventDefault();
+                resetScoresQuick();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && !recordingKey) {
+                closeSettings();
+            }
+        });
+
+        // Initialize on load
+        loadSettings();
+    </script>
+</body>
+</html>
