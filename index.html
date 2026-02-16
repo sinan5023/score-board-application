@@ -925,11 +925,25 @@
         function loadSettings() {
             const saved = localStorage.getItem('scoreboardSettings');
             if (saved) {
-                settings = JSON.parse(saved);
+                const savedSettings = JSON.parse(saved);
+                // Merge saved settings with defaults to handle new properties
+                settings = {
+                    ...settings,
+                    ...savedSettings,
+                    keybinds: {
+                        ...settings.keybinds,
+                        ...(savedSettings.keybinds || {})
+                    }
+                };
             }
             const savedScores = localStorage.getItem('scoreboardScores');
             if (savedScores) {
-                scores = JSON.parse(savedScores);
+                const savedScoresObj = JSON.parse(savedScores);
+                // Merge saved scores with defaults to handle new teams
+                scores = {
+                    ...scores,
+                    ...savedScoresObj
+                };
             }
             applySettings();
         }
@@ -941,10 +955,12 @@
             document.getElementById('team2Name').textContent = settings.team2Name;
             document.getElementById('team3Name').textContent = settings.team3Name;
             document.getElementById('team4Name').textContent = settings.team4Name;
-            document.getElementById('score1').textContent = scores.team1;
-            document.getElementById('score2').textContent = scores.team2;
-            document.getElementById('score3').textContent = scores.team3;
-            document.getElementById('score4').textContent = scores.team4;
+            
+            // Ensure scores are valid numbers
+            document.getElementById('score1').textContent = scores.team1 || 0;
+            document.getElementById('score2').textContent = scores.team2 || 0;
+            document.getElementById('score3').textContent = scores.team3 || 0;
+            document.getElementById('score4').textContent = scores.team4 || 0;
             
             document.getElementById('titleInput').value = settings.title;
             document.getElementById('team1Input').value = settings.team1Name;
@@ -953,15 +969,16 @@
             document.getElementById('team4Input').value = settings.team4Name;
             document.getElementById('shortcutsEnabled').checked = settings.shortcutsEnabled;
             
-            document.getElementById('team1Plus').value = settings.keybinds.team1Plus.toUpperCase();
-            document.getElementById('team1Minus').value = settings.keybinds.team1Minus.toUpperCase();
-            document.getElementById('team2Plus').value = settings.keybinds.team2Plus.toUpperCase();
-            document.getElementById('team2Minus').value = settings.keybinds.team2Minus.toUpperCase();
-            document.getElementById('team3Plus').value = settings.keybinds.team3Plus.toUpperCase();
-            document.getElementById('team3Minus').value = settings.keybinds.team3Minus.toUpperCase();
-            document.getElementById('team4Plus').value = settings.keybinds.team4Plus.toUpperCase();
-            document.getElementById('team4Minus').value = settings.keybinds.team4Minus.toUpperCase();
-            document.getElementById('resetKey').value = settings.keybinds.resetScores.toUpperCase();
+            // Ensure keybinds exist before accessing
+            document.getElementById('team1Plus').value = (settings.keybinds.team1Plus || 'q').toUpperCase();
+            document.getElementById('team1Minus').value = (settings.keybinds.team1Minus || 'a').toUpperCase();
+            document.getElementById('team2Plus').value = (settings.keybinds.team2Plus || 'p').toUpperCase();
+            document.getElementById('team2Minus').value = (settings.keybinds.team2Minus || 'l').toUpperCase();
+            document.getElementById('team3Plus').value = (settings.keybinds.team3Plus || 'i').toUpperCase();
+            document.getElementById('team3Minus').value = (settings.keybinds.team3Minus || 'k').toUpperCase();
+            document.getElementById('team4Plus').value = (settings.keybinds.team4Plus || 'o').toUpperCase();
+            document.getElementById('team4Minus').value = (settings.keybinds.team4Minus || 'm').toUpperCase();
+            document.getElementById('resetKey').value = (settings.keybinds.resetScores || 'r').toUpperCase();
             
             toggleShortcuts();
         }
